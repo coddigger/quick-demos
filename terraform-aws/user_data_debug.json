@@ -45,11 +45,11 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
                     "label": "my BIG-IP declaration for declarative onboarding",
                     "Common": {
                         "class": "Tenant",
-                        "hostname": "${ hostname }",
+                        "hostname": "bigip-1.f5demo.com",
                         "admin": {
                             "class": "User",
                             "userType": "regular",
-                            "password": "${ admin_pass }",
+                            "password": "mK8uynM8Aq",
                             "shell": "bash"
                         },
                         "myDns": {
@@ -82,7 +82,7 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
                         },
                         "external-self": {
                             "class": "SelfIp",
-                            "address": "${ external_ip }",
+                            "address": "10.0.2.135/24",
                             "vlan": "external",
                             "allowService": "none",
                             "trafficGroup": "traffic-group-local-only"
@@ -100,7 +100,7 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
                         },
                         "internal-self": {
                             "class": "SelfIp",
-                            "address": "${ internal_ip }",
+                            "address": "10.0.3.10/24",
                             "vlan": "internal",
                             "allowService": "default",
                             "trafficGroup": "traffic-group-local-only"
@@ -131,7 +131,7 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
                                 "nginx_test_app": {
                                     "class": "Service_HTTP",
                                     "virtualAddresses": [
-                                        "${ vs1_ip }"
+                                        "10.0.2.234"
                                     ],
                                     "persistenceMethods": [],
                                     "profileMultiplex": {
@@ -150,9 +150,9 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
                                             "addressDiscovery": "aws",
                                             "updateInterval": 1,
                                             "tagKey": "Name",
-                                            "tagValue": ${ app_tag },
+                                            "tagValue": "nginx-autoscale",
                                             "addressRealm": "private",
-                                            "region": "${ region }"
+                                            "region": "eu-west-2"
                                         }
                                     ]
                                 }

@@ -1,6 +1,11 @@
+variable "region" {
+  description = "region to be used in AWS"
+  default     = "eu-west-2"
+}
+
 variable "f5_ami_search_name" {
   description = "filter used to find AMI for deployment"
-  default     = "F5*BIGIP-14.1*Best*25Mbps*"
+  default     = "F5*BIGIP-16.1*Best*25Mbps*"
 }
 
 variable "prefix" {

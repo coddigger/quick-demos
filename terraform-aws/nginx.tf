@@ -27,19 +27,17 @@ resource "aws_autoscaling_group" "nginx" {
     create_before_destroy = true
   }
 
-  tags = [
-    {
-      key                 = "Name"
-      value               = "nginx-autoscale"
-      propagate_at_launch = true
-    },
-    {
-      key                 = "Env"
-      value               = "aws"
-      propagate_at_launch = true
-    },
-  ]
+  tag {
+    key                 = "Name"
+    value               = "${var.prefix}nginx-autoscale"
+    propagate_at_launch = true
+  }
 
+  tag {
+    key                 = "Env"
+    value               = "aws"
+    propagate_at_launch = true
+  }
 }
 
 resource "aws_launch_configuration" "nginx" {

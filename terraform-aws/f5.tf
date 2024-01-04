@@ -9,12 +9,10 @@ data "aws_ami" "f5_ami" {
   }
 }
 
-
 resource "random_string" "password" {
   length  = 10
   special = false
 }
-
 
 resource "aws_network_interface" "mgmt" {
   subnet_id       = module.vpc.public_subnets[0]
@@ -61,11 +59,11 @@ resource "aws_eip" "external-vs2" {
   associate_with_private_ip = element(tolist(aws_network_interface.external.private_ips), 2)
 }
 
-
 resource "aws_instance" "f5" {
 
   ami = data.aws_ami.f5_ami.id
   user_data = templatefile("./templates/user_data_json.tpl", {
+    region      = var.region
     hostname    = "mybigip.f5.com",
     admin_pass  = random_string.password.result,
     external_ip = "${aws_eip.external-self.private_ip}/24",
@@ -114,12 +112,14 @@ resource "aws_instance" "f5" {
 #
 resource "local_file" "test_user_debug" {
   content = templatefile("./templates/user_data_json.tpl", {
+    region      = var.region,
     hostname    = var.hostname-f5,
     admin_pass  = random_string.password.result,
     external_ip = "${aws_network_interface.external.private_ip}/24",
     internal_ip = "${aws_network_interface.internal.private_ip}/24",
     internal_gw = cidrhost(module.vpc.public_subnets_cidr_blocks[1], 1),
-    vs1_ip      = aws_eip.external-vs1.private_ip
+    vs1_ip      = aws_eip.external-vs1.private_ip,
+    app_tag     = "${var.prefix}nginx-autoscale"
   })
   filename = "${path.module}/user_data_debug.json"
 }
