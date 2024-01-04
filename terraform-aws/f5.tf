@@ -69,7 +69,8 @@ resource "aws_instance" "f5" {
     external_ip = "${aws_eip.external-self.private_ip}/24",
     internal_ip = "${aws_network_interface.internal.private_ip}/24",
     internal_gw = cidrhost(module.vpc.private_subnets_cidr_blocks[0], 1),
-    vs1_ip      = aws_eip.external-vs1.private_ip
+    vs1_ip      = aws_eip.external-vs1.private_ip,
+    app_tag     = "${var.prefix}nginx-autoscale"
   })
   iam_instance_profile = aws_iam_instance_profile.as3.name
   instance_type        = var.instance_type

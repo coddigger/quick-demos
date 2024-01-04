@@ -150,7 +150,7 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
                                             "addressDiscovery": "aws",
                                             "updateInterval": 1,
                                             "tagKey": "Name",
-                                            "tagValue": ${ app_tag },
+                                            "tagValue": "${ app_tag }",
                                             "addressRealm": "private",
                                             "region": "${ region }"
                                         }
