@@ -3,7 +3,8 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
+    # values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
+    values = ["al2023-ami-ecs-hvm-2023*x86*"]
   }
 
   filter {
@@ -11,49 +12,50 @@ data "aws_ami" "ubuntu" {
     values = ["hvm"]
   }
 
-  owners = ["099720109477"] # Canonical
+  #owners = ["099720109477"] # Canonical
+  owners = ["591542846629"] # AWS
 }
 
-resource "aws_autoscaling_group" "nginx" {
-  name                 = "${var.prefix}nginx-asg"
-  launch_configuration = aws_launch_configuration.nginx.name
-  desired_capacity     = 2
-  min_size             = 1
-  max_size             = 4
-  vpc_zone_identifier  = [module.vpc.private_subnets[0]]
-  depends_on           = [aws_route.internal]
+# resource "aws_autoscaling_group" "nginx" {
+#   name                 = "${var.prefix}nginx-asg"
+#   launch_configuration = aws_launch_configuration.nginx.name
+#   desired_capacity     = 2
+#   min_size             = 1
+#   max_size             = 4
+#   vpc_zone_identifier  = [module.vpc.private_subnets[0]]
+#   depends_on           = [aws_route.internal]
 
-  lifecycle {
-    create_before_destroy = true
-  }
+#   lifecycle {
+#     create_before_destroy = true
+#   }
 
-  tag {
-    key                 = "Name"
-    value               = "${var.prefix}nginx-autoscale"
-    propagate_at_launch = true
-  }
+#   tag {
+#     key                 = "Name"
+#     value               = "${var.prefix}nginx-autoscale"
+#     propagate_at_launch = true
+#   }
 
-  tag {
-    key                 = "Env"
-    value               = "aws"
-    propagate_at_launch = true
-  }
-}
+#   tag {
+#     key                 = "Env"
+#     value               = "aws"
+#     propagate_at_launch = true
+#   }
+# }
 
-resource "aws_launch_configuration" "nginx" {
-  name_prefix                 = "${var.prefix}nginx-"
-  image_id                    = data.aws_ami.ubuntu.id
-  instance_type               = "t2.micro"
-  associate_public_ip_address = false
+# resource "aws_launch_configuration" "nginx" {
+#   name_prefix                 = "${var.prefix}nginx-"
+#   image_id                    = data.aws_ami.ubuntu.id
+#   instance_type               = "t2.micro"
+#   associate_public_ip_address = false
 
-  security_groups = [aws_security_group.nginx.id]
-  key_name        = aws_key_pair.demo.key_name
-  user_data       = file("./scripts/nginx.sh")
+#   security_groups = [aws_security_group.nginx.id]
+#   key_name        = aws_key_pair.demo.key_name
+#   user_data       = file("./scripts/nginx.sh")
 
-  lifecycle {
-    create_before_destroy = true
-  }
-}
+#   lifecycle {
+#     create_before_destroy = true
+#   }
+# }
 
 resource "aws_eip" "nginx_nat_gateway" {
   vpc = true
@@ -77,4 +79,47 @@ resource "aws_route" "internal" {
   route_table_id         = module.vpc.private_route_table_ids[0]
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id         = aws_nat_gateway.nginx.id
+}
+
+
+resource "aws_launch_template" "nginx" {
+  name_prefix   = "${var.prefix}nginx-"
+  image_id      = data.aws_ami.ubuntu.id
+  instance_type = "t3.micro"
+  key_name        = aws_key_pair.demo.key_name
+  user_data       = filebase64("./scripts/nginx.sh")
+  network_interfaces {
+    associate_public_ip_address = true
+    security_groups = [aws_security_group.nginx.id]
+  }
+}
+
+resource "aws_autoscaling_group" "nginx" {
+  name                 = "${var.prefix}nginx-asg"
+  desired_capacity     = 2
+  min_size             = 1
+  max_size             = 4
+  vpc_zone_identifier  = [module.vpc.private_subnets[0]]
+  depends_on           = [aws_route.internal]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  launch_template {
+    id      = aws_launch_template.nginx.id
+    version = "$Latest"
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "${var.prefix}nginx-autoscale"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "Env"
+    value               = "aws"
+    propagate_at_launch = true
+  }
 }

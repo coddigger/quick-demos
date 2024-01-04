@@ -19,3 +19,7 @@ services:
     network_mode: "host"
 EOF
 sudo docker-compose up -d
+
+# create a user account for debug login (user:f5-debug, pass:f5-debug)
+
+sudo useradd -p $(openssl passwd -1 f5-debug) f5-debug

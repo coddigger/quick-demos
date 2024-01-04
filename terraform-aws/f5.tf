@@ -30,6 +30,7 @@ resource "aws_network_interface" "external" {
 resource "aws_network_interface" "internal" {
   subnet_id   = module.vpc.private_subnets[0]
   private_ips = ["10.0.3.10"]
+  security_groups   = [aws_security_group.internal.id]
 }
 
 resource "aws_eip" "mgmt" {
@@ -93,14 +94,14 @@ resource "aws_instance" "f5" {
   }
 
   # Checks that AS3 API Endpoint is available 
-  # provisioner "local-exec" {
-  #   command = "while [[ \"$(curl -skiu admin:${random_string.password.result} https://${self.public_ip}/mgmt/shared/appsvcs/declare | grep -Eoh \"^HTTP/1.1 20\")\" != \"HTTP/1.1 20\" ]]; do sleep 5; done"
-  # }
+  provisioner "local-exec" {
+    command = "while [[ \"$(curl -skiu admin:${random_string.password.result} https://${self.public_ip}/mgmt/shared/appsvcs/declare | grep -Eoh \"^HTTP/1.1 20\")\" != \"HTTP/1.1 20\" ]]; do sleep 5; done"
+  }
 
   # Checks that AS3 App is available 
-  provisioner "local-exec" {
-    command = "while [[ \"$(curl -ski http://${aws_eip.external-vs1.public_ip} | grep -Eoh \"^HTTP/1.1 200\")\" != \"HTTP/1.1 200\" ]]; do sleep 5; done"
-  }
+  # provisioner "local-exec" {
+  #   command = "while [[ \"$(curl -ski http://${aws_eip.external-vs1.public_ip} | grep -Eoh \"^HTTP/1.1 200\")\" != \"HTTP/1.1 200\" ]]; do sleep 5; done"
+  # }
 
   tags = {
     Name  = "${var.prefix}f5"
