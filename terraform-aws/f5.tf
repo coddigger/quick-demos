@@ -28,33 +28,33 @@ resource "aws_network_interface" "external" {
 }
 
 resource "aws_network_interface" "internal" {
-  subnet_id   = module.vpc.private_subnets[0]
-  private_ips = ["10.0.3.10"]
-  security_groups   = [aws_security_group.internal.id]
+  subnet_id       = module.vpc.private_subnets[0]
+  private_ips     = ["10.0.3.10"]
+  security_groups = [aws_security_group.internal.id]
 }
 
 resource "aws_eip" "mgmt" {
-  vpc                       = true
+  domain                    = "vpc"
   network_interface         = aws_network_interface.mgmt.id
   associate_with_private_ip = "10.0.1.10"
 }
 
 resource "aws_eip" "external-self" {
-  vpc               = true
+  domain            = "vpc"
   network_interface = aws_network_interface.external.id
   #associate_with_private_ip = "10.0.2.10"
   associate_with_private_ip = element(tolist(aws_network_interface.external.private_ips), 0)
 }
 
 resource "aws_eip" "external-vs1" {
-  vpc               = true
+  domain            = "vpc"
   network_interface = aws_network_interface.external.id
   #associate_with_private_ip = "10.0.2.101"
   associate_with_private_ip = element(tolist(aws_network_interface.external.private_ips), 1)
 }
 
 resource "aws_eip" "external-vs2" {
-  vpc               = true
+  domain            = "vpc"
   network_interface = aws_network_interface.external.id
   #associate_with_private_ip = "10.0.2.102"
   associate_with_private_ip = element(tolist(aws_network_interface.external.private_ips), 2)
@@ -128,6 +128,6 @@ resource "local_file" "test_user_debug" {
 
 
 resource "local_file" "output_creds_for_ansible" {
-  content = yamlencode({bigip_user: "admin", bigip_pass: "${random_string.password.result}"})
+  content  = yamlencode({ bigip_user : "admin", bigip_pass : "${random_string.password.result}" })
   filename = "../../creds/terraform_output_creds.yaml"
 }

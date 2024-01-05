@@ -2,8 +2,8 @@
 provider "aws" {
   #shared_credentials_file = "~/.aws/credentials"
   shared_credentials_files = ["~/.aws/credentials"]
-  profile                 = "Default"
-  region                  = var.region
+  profile                  = "Default"
+  region                   = var.region
 }
 
 module "vpc" {
