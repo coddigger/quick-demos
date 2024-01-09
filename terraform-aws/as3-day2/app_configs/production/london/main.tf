@@ -12,24 +12,26 @@ provider "bigip" {
   password = data.terraform_remote_state.aws_demo.outputs.f5_password
 }
 
-resource "bigip_as3" "nginx" {
-  as3_json     = templatefile("./as3_vs2.tpl", {
+resource "bigip_as3" "as3" {
+  as3_json = templatefile("./templates/as3_vs2.tpl", {
     vs2_ip     = jsonencode([data.terraform_remote_state.aws_demo.outputs.f5_vs2[0]])
     cert       = var.cert
     key        = var.key
     ciphertext = base64encode(var.ciphertext)
     protected  = base64encode(var.protected)
+    app_list   = var.app_list
   })
 }
 
-resource "local_file" "nginx" {
-  content       = templatefile("./as3_vs2.tpl", {
+resource "local_file" "as3" {
+  content = templatefile("./templates/as3_vs2.tpl", {
     vs2_ip     = jsonencode([data.terraform_remote_state.aws_demo.outputs.f5_vs2[0]])
     cert       = var.cert
     key        = var.key
     ciphertext = base64encode(var.ciphertext)
     protected  = base64encode(var.protected)
+    app_list   = var.app_list
 
   })
-  filename = "./rendered-as3.json"
+  filename = "./declarations/rendered-as3.json"
 }
