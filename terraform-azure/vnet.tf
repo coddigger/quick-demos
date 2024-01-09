@@ -1,23 +1,21 @@
-
-
 #
 # Create a random id
 #
-resource random_id id {
+resource "random_id" "id" {
   byte_length = 2
 }
 
-resource random_string storage {
-  length      = 4
-  upper       = false
-  lower       = true
-  number      = false
-  special     = false
+resource "random_string" "storage" {
+  length  = 4
+  upper   = false
+  lower   = true
+  numeric = false
+  special = false
 }
 #
 # Create a resource group
 #
-resource azurerm_resource_group rg {
+resource "azurerm_resource_group" "rg" {
   name     = format("%s-rg-%s", var.prefix, random_id.id.hex)
   location = var.location
 }
@@ -46,8 +44,8 @@ resource "azurerm_virtual_network" "uksouth" {
   }
 
   tags = {
-    environment = "Production"
-    uk-se = var.uk_se_name
+    environment = "Demo"
+    uk-se       = var.uk_se_name
   }
 }
 
