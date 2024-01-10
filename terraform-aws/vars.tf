@@ -30,5 +30,5 @@ variable "username" {
 
 variable "instance_type" {
   description = "aws ec2 instance type"
-  default     = "t2.large"
+  default     = "t3.large"
 }
